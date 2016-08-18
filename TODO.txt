@@ -1,0 +1,6 @@
+
+
+1) Take also app icons <-- we should run our algorithms on these and see if beauty affects success.
+
+2) Take app rank <-- for top apps.
+3) Take screenshots; number of installs; number of ratings; average rating; maturity rating; 

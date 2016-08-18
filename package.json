@@ -1,0 +1,10 @@
+{
+  "name": "ff_addon_scrap_amazon",
+  "title": "ff_addon_scrap_amazon",
+  "id": "hithere1@google.com",
+  "description": "a basic add-on for opening Amazon pages and collecting data from them",
+  "author": "",
+  "license": "MPL 2.0",
+  "version": "0.1",
+  "main": "lib/main.js"
+}

@@ -1,0 +1,4 @@
+cfx run -g "devGPlayCrawl"
+
+
+cfx xpi --pkgdir /Users/Aleksii/Projects/exp3.addon
