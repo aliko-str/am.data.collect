@@ -1,4 +1,5 @@
 (function run() {
+	const _debug = false;
 	self.port.emit("hello", "HI from the client script. URL: " + window.location.href);
 	// if(!window.AmazonBookPiece2){
 		// console.error("AmazonBookPiece2 isn't defined in the content script");
@@ -9,10 +10,11 @@
 
 	self.port.on("run", function(){
 		if(!window.AmazonBookPiece2){
-			console.error("AmazonBookPiece2 isn't defined in the content script");
 			self.port.emit("error", "AmazonBookPiece2 isn't defined in the content script");
 		}
-		console.log("ABOUT TO RUN page detail Extraction");
+		if(_debug){
+			console.log("ABOUT TO RUN page detail Extraction");
+		}
 		self.port.emit("data", doExtraction());
 	});
 })();
@@ -81,11 +83,3 @@ function doExtraction(){
 	
 	return new window.AmazonBookPiece2(descr, avgPrice, commentArr, size, ifPaper, ifKindle);
 }
-
-// function getAllNRatings(jqRoot){
-	// var nRating1, nRating2, nRating3, nRating4, nRating5;
-	// jqRoot.find("table#histogramTable").find("tr").each(function(){
-		// var jqThis = $(this);
-		// // UNFINISHED
-	// });
-// }

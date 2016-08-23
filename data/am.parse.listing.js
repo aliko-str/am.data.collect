@@ -1,12 +1,13 @@
 (function run() {
-	console.log("HEELLOOO FROM THE CLIENT SCRIPT!!");
+	const _debug = false;
 	self.port.emit("hello", "HI from the client script. URL: " + window.location.href);
 	self.port.on("run", function(){
 		if(!window.AmazonBookPiece1){
-			console.error("AmazonBookPiece1 isn't defined in the content script");
 			self.port.emit("error", " -- AmazonBookPiece1 isn't defined in the content script");
 		}
-		console.log("ABOUT TO RUN extraction");
+		if(_debug){
+			console.log("ABOUT TO RUN extraction");			
+		}
 		self.port.emit("data", doExtraction());
 	});
 })();
@@ -71,7 +72,7 @@ function getNRatings(jqItemRoot){
 function getRating(jqItemRoot){
 	var jqRating = jqItemRoot.find("i.a-icon-star > span");
 	if(!jqRating.length){
-		console.log("We don't have a raring -- return 0");
+		console.log("We don't have a rating -- return 0");
 		return 0;
 	}
 	var rating = jqRating.text();
@@ -85,6 +86,9 @@ function getRating(jqItemRoot){
 
 function getIcoUrl(jqItemRoot){
 	var icoUrl = jqItemRoot.find("img.s-access-image").attr("srcset");
+	if(icoUrl == undefined){
+		return null;
+	}
 	icoUrl = icoUrl.split(",");
 	// .filter(function(el){
 		// return el.indexOf(" 3x") > -1;
