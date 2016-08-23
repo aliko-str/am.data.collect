@@ -1,10 +1,14 @@
 (function run() {
+	console.log("HEELLOOO FROM THE CLIENT SCRIPT!!");
 	self.port.emit("hello", "HI from the client script. URL: " + window.location.href);
-	if(!window.AmazonBookPiece1){
-		console.error("AmazonBookPiece1 isn't defined in the content script");
-		self.port.emit("error", "AmazonBookPiece1 isn't defined in the content script");
-	}
-	self.port.emit("data", doExtraction());
+	self.port.on("run", function(){
+		if(!window.AmazonBookPiece1){
+			console.error("AmazonBookPiece1 isn't defined in the content script");
+			self.port.emit("error", " -- AmazonBookPiece1 isn't defined in the content script");
+		}
+		console.log("ABOUT TO RUN extraction");
+		self.port.emit("data", doExtraction());
+	});
 })();
 
 function getQueryVariable(variable) {
@@ -37,7 +41,7 @@ function doExtraction(){
 		}
 		
 		var ifBest = (jqOneItem.find("span.sx-bestseller-badge").length > 0);
-		var title = jqOneItem.find("a.s-access-detail-page > h2").text();
+		var title = jqOneItem.find("a.s-access-detail-page > h2").text().replace("\t", " ");
 		var url = jqOneItem.find("a.s-access-detail-page").attr("href");
 		var icoUrl = getIcoUrl(jqOneItem);
 		var releaseDateStr =  jqOneItem.find("div.a-row.a-spacing-small > span.a-size-small.a-color-secondary").text();
@@ -46,6 +50,7 @@ function doExtraction(){
 		var positionInList = _bookCounter;
 		allBooks.push(new window.AmazonBookPiece1(title, url, icoUrl, releaseDateStr, rating, nRatings, ifBest, positionInList, pageNum));
 	});
+	console.log("EXTRACTION FINISHED");
 	return allBooks;
 }
 
@@ -80,12 +85,18 @@ function getRating(jqItemRoot){
 
 function getIcoUrl(jqItemRoot){
 	var icoUrl = jqItemRoot.find("img.s-access-image").attr("srcset");
-	icoUrl = icoUrl.split(",").filter(function(el){
-		return el.indexOf(" 3x") > -1;
-	});
+	icoUrl = icoUrl.split(",");
+	// .filter(function(el){
+		// return el.indexOf(" 3x") > -1;
+	// });
 	if(icoUrl.length < 1){
 		console.error("Couldn't get an icon url");
 		throw new Error("Couldn't get an icon url");
+		icoUrl = jqItemRoot.find("img.s-access-image").attr("src");
+		
+	}else{
+		icoUrl = icoUrl[icoUrl.length-1];
+		icoUrl = icoUrl.trim().split(" ")[0];
 	}
-	return icoUrl[0];
+	return icoUrl;
 }

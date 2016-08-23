@@ -2,3 +2,6 @@ cfx run -g "devGPlayCrawl"
 
 
 cfx xpi --pkgdir /Users/Aleksii/Projects/exp3.addon
+
+/Users/Aleksii/node_modules/jpm/bin/jpm run --debug -b /Users/Aleksii/tmp/FirefoxDev.app -p dev3.am.addon  --no-copy
+/Users/Aleksii/node_modules/jpm/bin/jpm run -b /Users/Aleksii/tmp/FirefoxDev.app -p dev3.am.addon  --no-copy
