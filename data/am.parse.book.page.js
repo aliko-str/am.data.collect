@@ -20,7 +20,7 @@
 function doExtraction(){
 	const allBooks = [];
 	const jqRoot = $("div.a-container[role='main']");
-	if(jqRoot.find("h1#title").length < 1){
+	if(jqRoot.find("h1#title, h1.parseasinTitle ").length < 1){
 		// Amazon is probably asking for Captcha -- let's signal to the addon script
 		return "captcha";
 	}
