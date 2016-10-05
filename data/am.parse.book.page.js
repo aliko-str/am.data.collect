@@ -1,3 +1,6 @@
+// TODO per-start data
+// TODO additional data for comments
+
 (function run() {
 	const _debug = false;
 	self.port.emit("hello", "HI from the client script. URL: " + window.location.href);
@@ -20,6 +23,12 @@
 function doExtraction(){
 	const allBooks = [];
 	const jqRoot = $("div.a-container[role='main']");
+	if(jqRoot.find("img#d[alt='Dogs of Amazon']").length){
+		// Book not found -- just skip it
+		console.log("Book not found -- just skip it");
+		return null;
+	}
+	
 	if(jqRoot.find("h1#title, h1.parseasinTitle ").length < 1){
 		// Amazon is probably asking for Captcha -- let's signal to the addon script
 		return "captcha";
@@ -51,11 +60,45 @@ function doExtraction(){
 		return null;
 	}
 	
-	const commentArr = jqRoot.find("div#revMHRL > div").find("div.a-section").map(function(){
-		return $(this).text().trim().replace(/\t/g, "").replace(/\n/g, "");
+	const commentArr = getCommentArr(jqRoot);
+	const allRatings = getAllRatings(jqRoot);
+	return new window.AmazonBookPiece2(descr, commentArr, size, prices.paperPrice, prices.kindlePrice, prices.hardcPrice, allRatings);
+}
+
+
+function getAllRatings(jqRoot){
+	var allRatings = {};
+	var jqRatTable = jqRoot.find("table#histogramTable");
+	var i = 0;
+	while(i++ < 5){
+		var aStarVal = jqRatTable.find("a." + i + "star.histogram-review-count");
+		if(aStarVal.length){
+			allRatings["r" + i] = aStarVal.text().trim().replace("%", "");
+		}else{
+			allRatings["r" + i] = 0;
+		}
+	}
+	return allRatings;
+}
+
+
+function getCommentArr(jqRoot){
+	// var commArr = jqRoot.find("div#revMHRL > div").find("div.a-section").map(function(){
+		// return $(this).text().trim().replace(/\t/g, "").replace(/\n/g, "");
+	// });
+	
+	var commArr = jqRoot.find("div#cm-cr-review-list > div.review").map(function(){
+		var aComment = {};
+		var jqThis = $(this);
+		aComment.text = jqThis.find("span.review-text div.a-expander-content").text().trim().replace(/\t/g, "").replace(/\n/g, "");
+		aComment.date = jqThis.find("span.review-date").text().trim();
+		aComment.stars = jqThis.find("i.review-rating").text().trim();
+		aComment.helpf = jqThis.find("span.cr-vote span.review-votes").text().trim().replace("people found this helpful.", "") || "NA";
+		aComment.title = jqThis.find("a.review-title").text().trim();
+		return aComment;
 	});
 	
-	return new window.AmazonBookPiece2(descr, commentArr, size, prices.paperPrice, prices.kindlePrice, prices.hardcPrice);
+	return commArr;
 }
 
 
