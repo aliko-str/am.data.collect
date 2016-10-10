@@ -77,7 +77,7 @@ function getRating(jqItemRoot){
 	}
 	var rating = jqRating.text();
 	rating = rating.split(" ");
-	rating = window.parseInt(rating[0], 10);
+	rating = window.parseFloat(rating[0], 10);
 	if(isNaN(rating)){
 		throw new Error("Rating is not a number: ", jqRating.text());
 	}
