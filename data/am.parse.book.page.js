@@ -63,23 +63,54 @@ function doExtraction(){
 	const commentArr = getCommentArr(jqRoot);
 	const allRatings = getAllRatings(jqRoot);
 	
-	const commentUrl = jqRoot.find("div#revF").find("a").attr("href");
+	const commentUrl = getCommentUrl(jqRoot); // jqRoot.find("div#revF").find("a").attr("href");
 	
 	return new window.AmazonBookPiece2(descr, commentArr, size, prices.paperPrice, prices.kindlePrice, prices.hardcPrice, allRatings, commentUrl);
+}
+
+function getCommentUrl(jqRoot){
+	var jqSubRoot = jqRoot.find("div#revF");
+	var jqA; 
+	if(jqSubRoot.length){
+		jqA = jqSubRoot.find("a");
+	}else{
+		jqSubRoot = jqRoot.find("div#reviews-medley-footer");
+		jqA = jqSubRoot.find("a[data-hook='see-all-reviews-link-foot']");
+	}
+	if(jqA.length){
+		return jqA[0].href;
+	}
+	return null;
 }
 
 
 function getAllRatings(jqRoot){
 	var allRatings = {r1:0, r2:0, r3:0, r4:0, r5:0};
 	var jqRatTable = jqRoot.find("table#histogramTable");
-	var jqLinkStars = jqRatTable.find("td.a-nowrap > a.a-link-normal").filter(function(){
-		return $(this).text().indexOf("%") > -1;
-	});
-	jqLinkStars.each(function(){
-		var jqThis = $(this);
-		allRatings["r" + jqThis.attr("title").substring(0,1)] = jqThis.text().replace("%","");
-	});
 	
+	
+	var jqLinkStars = jqRatTable.find("td.a-nowrap > a.a-link-normal");
+	if(!jqLinkStars.length){
+		jqLinkStars = jqRatTable.find("td.aok-nowrap > a.a-link-normal");
+		jqLinkStars.each(function(){
+			var jqThis = $(this);
+			var aStar = this.className.split(/\s+/).filter(function(str){return str.indexOf("star") > -1; });
+			if(!aStar.length){
+				console.error("NO star detected...");
+			}
+			aStar = aStar[0].substring(0,1);
+			allRatings["r" + aStar] = jqThis.text().replace("%","");
+		});		
+	}else{
+		jqLinkStars.filter(function(){
+			return $(this).text().indexOf("%") > -1;
+		});
+		jqLinkStars.each(function(){
+			var jqThis = $(this);
+			allRatings["r" + jqThis.attr("title").substring(0,1)] = jqThis.text().replace("%","");
+		});
+	}
+
 	
 	// var i = 0;
 	// while(i++ < 5){
@@ -99,28 +130,33 @@ function getCommentArr(jqRoot){
 		// return $(this).text().trim().replace(/\t/g, "").replace(/\n/g, "");
 	// });
 	//  
-	// var commArr = jqRoot.find("div#cm-cr-review-list > div.review").map(function(){
-		// var aComment = {};
-		// var jqThis = $(this);
-		// aComment.text = jqThis.find("span.review-text div.a-expander-content").text().trim().replace(/\t/g, "").replace(/\n/g, "");
-		// aComment.date = jqThis.find("span.review-date").text().trim();
-		// aComment.stars = jqThis.find("i.review-rating").text().trim();
-		// aComment.helpf = jqThis.find("span.cr-vote span.review-votes").text().trim().replace("people found this helpful.", "") || "NA";
-		// aComment.title = jqThis.find("a.review-title").text().trim();
-		// return aComment;
-	// });
-
-	var commArr = jqRoot.find("div#revMHRL > div.a-section").map(function(){
-		var aComment = {};
-		var jqThis = $(this);
-		aComment.text = jqThis.find("div.a-row > div.a-section").text().trim().replace(/\t/g, "").replace(/\n/g, "");
-		aComment.date = jqThis.find("span.a-color-secondary > span.a-color-secondary").text().trim();
-		aComment.stars = jqThis.find("i.a-icon-star").text().trim();
-		aComment.helpf = jqThis.find("span.votingStripe > span.a-size-base").text().trim().replace("found this helpful. Was this review helpful to you?              Yes No", "").substring(0, 10) || 0;
-		aComment.title = jqThis.find("div.a-icon-row span.a-size-base").text().trim();
-		return aComment;
-	});
 	
+	var commArr;
+	
+	if(jqRoot.find("div#revMHRL").length){
+		commArr = jqRoot.find("div#revMHRL > div.a-section").map(function(){
+			var aComment = {};
+			var jqThis = $(this);
+			aComment.text = jqThis.find("div.a-row > div.a-section").text().trim().replace(/\t/g, "").replace(/\n/g, "");
+			aComment.date = jqThis.find("span.a-color-secondary > span.a-color-secondary").text().trim();
+			aComment.stars = jqThis.find("i.a-icon-star").text().trim();
+			aComment.helpf = jqThis.find("span.votingStripe > span.a-size-base").text().trim().replace("found this helpful. Was this review helpful to you?              Yes No", "").substring(0, 10) || 0;
+			aComment.title = jqThis.find("div.a-icon-row span.a-size-base").text().trim();
+			return aComment;
+		});		
+	}else{
+		commArr = jqRoot.find("div#cm-cr-review-list > div.review").map(function(){
+			var aComment = {};
+			var jqThis = $(this);
+			aComment.text = jqThis.find("span.review-text div.a-expander-content").text().trim().replace(/\t/g, "").replace(/\n/g, "");
+			aComment.date = jqThis.find("span.review-date").text().trim();
+			aComment.stars = jqThis.find("i.review-rating").text().trim();
+			aComment.helpf = jqThis.find("span.cr-vote span.review-votes").text().trim().replace("people found this helpful.", "") || "0";
+			aComment.title = jqThis.find("a.review-title").text().trim();
+			return aComment;
+		});
+	}
+
 	return commArr;
 }
 
